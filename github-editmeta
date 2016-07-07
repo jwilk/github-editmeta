@@ -74,6 +74,9 @@ class http(object):
     def patch(self, url, *, data):
         return self._request('PATCH', url, data=data)
 
+    def delete(self, url):
+        return self._request('DELETE', url)
+
 http = http()
 
 def main():
@@ -100,6 +103,9 @@ def main():
         ini.seek(0)
         config = configparser.ConfigParser(interpolation=None)
         config.read_file(ini)
+    if config.getboolean(repo, 'delete', fallback=False):
+        http.delete(repo_url)
+        return
     data = {}
     for key in keys:
         orig_value = orig_data[key]
