@@ -22,6 +22,7 @@
 
 import argparse
 import configparser
+import getpass
 import json
 import os
 import subprocess
@@ -84,6 +85,8 @@ def main():
     ap.add_argument('repo', metavar='REPO')
     options = ap.parse_args()
     repo = options.repo
+    if '/' not in repo:
+        repo = '{user}/{repo}'.format(user=getpass.getuser(), repo=repo)
     repo_url = '/repos/' + repo
     response = http.get(repo_url)
     orig_data = read_json(response)
