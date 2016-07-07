@@ -30,8 +30,6 @@ import tempfile
 import urllib.request
 import pprint
 
-user_agent = 'github-editmeta (https://github.com/jwilk/github-editmeta)'
-
 keys = [
     'name',
     'description',
@@ -54,24 +52,38 @@ def run_editor(file):
     editor = editor.strip()
     subprocess.check_call([editor + b' "$@"', editor, file.name], shell=True)
 
+class http(object):
+
+    def _request(self, method, url, *, data=None):
+        token = os.environ['GITHUB_TOKEN']
+        headers = {
+            'User-Agent': 'github-editmeta (https://github.com/jwilk/github-editmeta)',
+            'Authorization': ('token ' + token),
+            'Accept': 'application/vnd.github.v3+json',
+        }
+        url = urllib.parse.urljoin('https://api.github.com', url)
+        request = urllib.request.Request(url, headers=headers, method=method, data=data)
+        try:
+            return urllib.request.urlopen(request)
+        except urllib.error.HTTPError as exc:
+            pprint.pprint(read_json(exc), stream=sys.stderr)
+            raise
+
+    def get(self, url):
+        return self._request('GET', url)
+
+    def patch(self, url, *, data):
+        return self._request('PATCH', url, data=data)
+
+http = http()
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('repo', metavar='REPO')
     options = ap.parse_args()
     repo = options.repo
-    token = os.environ['GITHUB_TOKEN']
-    headers = {
-        'User-Agent': user_agent,
-        'Authorization': ('token ' + token),
-        'Accept': 'application/vnd.github.v3+json',
-    }
-    url = 'https://api.github.com/repos/' + repo
-    request = urllib.request.Request(url, headers=headers)
-    try:
-        response = urllib.request.urlopen(request)
-    except urllib.error.HTTPError as exc:
-        pprint.pprint(read_json(exc), stream=sys.stderr)
-        raise
+    repo_url = '/repos/' + repo
+    response = http.get(repo_url)
     orig_data = read_json(response)
     config = configparser.ConfigParser(interpolation=None)
     config[repo] = {}
@@ -103,12 +115,7 @@ def main():
             continue
         data[key] = value
     json_data = json.dumps(data).encode('UTF-8')
-    request = urllib.request.Request(url, headers=headers, data=json_data, method='PATCH')
-    try:
-        urllib.request.urlopen(request)
-    except urllib.error.HTTPError as exc:
-        pprint.pprint(read_json(exc), stream=sys.stderr)
-        raise
+    http.patch(repo_url, data=json_data)
 
 if __name__ == '__main__':
     main()
