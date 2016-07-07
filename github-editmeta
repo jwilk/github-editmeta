@@ -25,10 +25,8 @@ import configparser
 import json
 import os
 import subprocess
-import sys
 import tempfile
 import urllib.request
-import pprint
 
 keys = [
     'name',
@@ -66,7 +64,8 @@ class http(object):
         try:
             return urllib.request.urlopen(request)
         except urllib.error.HTTPError as exc:
-            pprint.pprint(read_json(exc), stream=sys.stderr)
+            msg = json.dumps(read_json(exc), sort_keys=True, indent=4, separators=(',', ': '))
+            exc.msg += '\n\n' + msg
             raise
 
     def get(self, url):
