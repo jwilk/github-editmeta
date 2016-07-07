@@ -118,6 +118,11 @@ def main():
                     value = None
         except configparser.NoOptionError:
             continue
+        if key == 'default_branch' and value == orig_value:
+            # Changing default branch doesn't work in empty repos:
+            # > Cannot update default branch for an empty repository.
+            # > Please init the repository and push first.
+            continue
         data[key] = value
     json_data = json.dumps(data).encode('UTF-8')
     http.patch(repo_url, data=json_data)
