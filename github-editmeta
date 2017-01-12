@@ -51,7 +51,14 @@ def run_editor(file):
     editor = editor.strip()
     subprocess.check_call([editor + b' "$@"', editor, file.name], shell=True)
 
-class http(object):
+class UserAgent(object):
+
+    def __init__(self, cafile=None):
+        if cafile is None:
+            ca_options = dict(cadefault=True)
+        else:
+            ca_options = dict(cafile=cafile)
+        self._ca_options = ca_options
 
     def _request(self, method, url, *, data=None):
         token = os.environ['GITHUB_TOKEN']
@@ -63,7 +70,7 @@ class http(object):
         url = urllib.parse.urljoin('https://api.github.com', url)
         request = urllib.request.Request(url, headers=headers, method=method, data=data)
         try:
-            return urllib.request.urlopen(request, cadefault=True)
+            return urllib.request.urlopen(request, **self._ca_options)
         except urllib.error.HTTPError as exc:
             msg = json.dumps(read_json(exc), sort_keys=True, indent=4, separators=(',', ': '))
             exc.msg += '\n\n' + msg
@@ -78,16 +85,16 @@ class http(object):
     def delete(self, url):
         return self._request('DELETE', url)
 
-http = http()
-
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument('--ca-file', metavar='FILE', help='trust these CA certificate(s)')
     ap.add_argument('repo', metavar='REPO')
     options = ap.parse_args()
     repo = options.repo
     if '/' not in repo:
         repo = '{user}/{repo}'.format(user=getpass.getuser(), repo=repo)
     repo_url = '/repos/' + repo
+    http = UserAgent(cafile=options.ca_file)
     response = http.get(repo_url)
     orig_data = read_json(response)
     config = configparser.ConfigParser(interpolation=None)
