@@ -26,6 +26,7 @@ import getpass
 import json
 import os
 import subprocess
+import sys
 import tempfile
 import urllib.request
 
@@ -137,7 +138,14 @@ def main():
     json_data = json.dumps(data).encode('UTF-8')
     http.patch(repo_url, data=json_data)
 
+def require_python(*version):
+    if sys.version_info < version:
+        version_str = '.'.join(str(x) for x in version)
+        message = 'Python >= {0} is required'.format(version_str)
+        raise RuntimeError(message)
+
 if __name__ == '__main__':
+    require_python(3, 3)
     main()
 
 # vim:ts=4 sts=4 sw=4 et
