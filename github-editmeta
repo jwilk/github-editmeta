@@ -47,10 +47,22 @@ def read_json(fp):
         data = data.decode('UTF-8')
         return json.loads(data)
 
-def run_editor(file):
-    editor = subprocess.check_output(['git', 'var', 'GIT_EDITOR'])
-    editor = editor.strip()
-    subprocess.check_call([editor + b' "$@"', editor, file.name], shell=True)
+class GitEditor(object):
+
+    def __init__(self, trust_cwd=False):
+        cmdline = ['git', 'var', 'GIT_EDITOR']
+        if not trust_cwd:
+            cmdline[1:1] = ['-C', '/']
+        editor = subprocess.check_output(cmdline)
+        editor = editor.strip()
+        self._editor = editor
+
+    def edit(self, file):
+        editor = self._editor
+        subprocess.check_call(
+            [editor + b' "$@"', editor, file.name],
+            shell=True
+        )
 
 class UserAgent(object):
 
@@ -107,10 +119,11 @@ def main():
         elif value is None:
             value = ''
         config[repo][key] = value
+    editor = GitEditor()
     with tempfile.NamedTemporaryFile(prefix='github-editmeta.', suffix='.ini', mode='w+t') as ini:
         config.write(ini)
         ini.flush()
-        run_editor(ini)
+        editor.edit(ini)
         ini.seek(0)
         config = configparser.ConfigParser(interpolation=None)
         config.read_file(ini)
