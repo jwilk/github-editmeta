@@ -57,10 +57,10 @@ class GitEditor(object):
         editor = editor.strip()
         self._editor = editor
 
-    def edit(self, file):
+    def edit(self, path):
         editor = self._editor
         subprocess.check_call(
-            [editor + b' "$@"', editor, file.name],
+            [editor + b' "$@"', editor, path],
             shell=True
         )
 
@@ -120,13 +120,14 @@ def main():
             value = ''
         config[repo][key] = value
     editor = GitEditor()
-    with tempfile.NamedTemporaryFile(prefix='github-editmeta.', suffix='.ini', mode='w+t') as ini:
-        config.write(ini)
-        ini.flush()
-        editor.edit(ini)
-        ini.seek(0)
+    with tempfile.TemporaryDirectory(prefix='github-editmeta.') as tmpdir:
+        path = os.path.join(tmpdir, 'meta.ini')
+        with open(path, 'w+t') as file:
+            config.write(file)
+        editor.edit(path)
         config = configparser.ConfigParser(interpolation=None)
-        config.read_file(ini)
+        with open(path, 'rt') as file:
+            config.read_file(file)
     if config.getboolean(repo, 'delete', fallback=False):
         http.delete(repo_url)
         return
