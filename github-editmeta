@@ -36,6 +36,7 @@ keys = [
     'homepage',
     'private',
     'has_issues',
+    'has_projects',
     'has_wiki',
     'has_downloads',
     'default_branch',
