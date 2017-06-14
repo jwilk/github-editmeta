@@ -149,6 +149,12 @@ def main():
             # > Cannot update default branch for an empty repository.
             # > Please init the repository and push first.
             continue
+        if key == 'has_projects' and value == orig_value == False:
+            # If the organization disabled project, then you can't set
+            # has_projects even to false:
+            # > This repository's organization has repository projects
+            # > disabled, so projects cannot be enabled for this repository.
+            continue
         data[key] = value
     json_data = json.dumps(data).encode('UTF-8')
     http.patch(repo_url, data=json_data)
