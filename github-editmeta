@@ -25,6 +25,7 @@ import configparser
 import getpass
 import json
 import os
+import ssl
 import subprocess
 import sys
 import tempfile
@@ -68,10 +69,16 @@ class GitEditor(object):
 class UserAgent(object):
 
     def __init__(self, cafile=None):
+        ca_options = {}
         if cafile is None:
-            ca_options = dict(cadefault=True)
+            if sys.version_info < (3, 4, 3):
+                ca_options = dict(cadefault=True)
         else:
-            ca_options = dict(cafile=cafile)
+            if sys.version_info < (3, 4, 3):
+                ca_options = dict(cafile=cafile)
+            else:
+                tls_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=cafile)
+                ca_options = dict(context=tls_context)
         self._ca_options = ca_options
 
     def _request(self, method, url, *, data=None):
