@@ -70,15 +70,9 @@ class UserAgent(object):
 
     def __init__(self, cafile=None):
         ca_options = {}
-        if cafile is None:
-            if sys.version_info < (3, 4, 3):
-                ca_options = dict(cadefault=True)
-        else:
-            if sys.version_info < (3, 4, 3):
-                ca_options = dict(cafile=cafile)
-            else:
-                tls_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=cafile)
-                ca_options = dict(context=tls_context)
+        if cafile is not None:
+            tls_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=cafile)
+            ca_options = dict(context=tls_context)
         self._ca_options = ca_options
 
     def _request(self, method, url, *, data=None):
@@ -176,7 +170,7 @@ def require_python(*version):
         raise RuntimeError(message)
 
 if __name__ == '__main__':
-    require_python(3, 3)
+    require_python(3, 4, 3)
     main()
 
 # vim:ts=4 sts=4 sw=4 et
