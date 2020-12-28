@@ -25,7 +25,6 @@ import configparser
 import getpass
 import json
 import os
-import ssl
 import subprocess
 import sys
 import tempfile
@@ -68,13 +67,6 @@ class GitEditor(object):
 
 class UserAgent(object):
 
-    def __init__(self, cafile=None):
-        ca_options = {}
-        if cafile is not None:
-            tls_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=cafile)
-            ca_options = dict(context=tls_context)
-        self._ca_options = ca_options
-
     def _request(self, method, url, *, data=None):
         token = os.environ['GITHUB_TOKEN']
         headers = {
@@ -85,7 +77,7 @@ class UserAgent(object):
         url = urllib.parse.urljoin('https://api.github.com', url)
         request = urllib.request.Request(url, headers=headers, method=method, data=data)
         try:
-            return urllib.request.urlopen(request, **self._ca_options)
+            return urllib.request.urlopen(request)
         except urllib.error.HTTPError as exc:
             msg = json.dumps(read_json(exc), sort_keys=True, indent=4, separators=(',', ': '))
             exc.msg += '\n\n' + msg
@@ -102,7 +94,6 @@ class UserAgent(object):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--ca-file', metavar='FILE', help='trust these CA certificate(s)')
     ap.add_argument('repo', metavar='REPO')
     options = ap.parse_args()
     repo = options.repo
@@ -112,7 +103,7 @@ def main():
     elif '/' not in repo:
         repo = '{user}/{repo}'.format(user=getpass.getuser(), repo=repo)
     repo_url = '/repos/' + repo
-    http = UserAgent(cafile=options.ca_file)
+    http = UserAgent()
     response = http.get(repo_url)
     orig_data = read_json(response)
     config = configparser.ConfigParser(interpolation=None)
