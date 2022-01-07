@@ -139,18 +139,10 @@ def main():
                     value = None
         except configparser.NoOptionError:
             continue
-        if key == 'default_branch' and value == orig_value:
-            # Changing default branch doesn't work in empty repos:
-            # > Cannot update default branch for an empty repository.
-            # > Please init the repository and push first.
-            continue
-        if key == 'has_projects' and value == orig_value == False:
-            # If the organization disabled projects, then you can't set
-            # has_projects even to false:
-            # > This repository's organization has repository projects
-            # > disabled, so projects cannot be enabled for this repository.
-            continue
-        data[key] = value
+        if value != orig_value:
+            data[key] = value
+    if not data:
+        return
     json_data = json.dumps(data).encode('UTF-8')
     http.patch(repo_url, data=json_data)
 
