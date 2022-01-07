@@ -79,7 +79,7 @@ class UserAgent(object):
         try:
             return urllib.request.urlopen(request)
         except urllib.error.HTTPError as exc:
-            msg = json.dumps(read_json(exc), sort_keys=True, indent=4, separators=(',', ': '))
+            msg = json.dumps(read_json(exc), sort_keys=True, indent=4)
             exc.msg += '\n\n' + msg
             raise
 
