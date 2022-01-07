@@ -145,7 +145,7 @@ def main():
             # > Please init the repository and push first.
             continue
         if key == 'has_projects' and value == orig_value == False:
-            # If the organization disabled project, then you can't set
+            # If the organization disabled projects, then you can't set
             # has_projects even to false:
             # > This repository's organization has repository projects
             # > disabled, so projects cannot be enabled for this repository.
