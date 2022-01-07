@@ -41,5 +41,9 @@ jobs:
     - name: smoke test
       run: |
         ./github-editmeta --help
+        ./github-editmeta ${{github.repository}}
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        EDITOR: cat
 
 # vim:ts=2 sts=2 sw=2 et
