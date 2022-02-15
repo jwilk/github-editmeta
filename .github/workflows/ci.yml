@@ -33,7 +33,7 @@ jobs:
     - name: run pydiatra
       run: |
         python3 -m pip install pydiatra
-        python3 -m pydiatra github-*
+        python3 -m pydiatra -v github-*
     - name: run pyflakes
       run: |
         python3 -m pip install pyflakes
