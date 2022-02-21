@@ -85,7 +85,8 @@ def main():
     if repo.startswith(clone_url_base):
         repo = repo[len(clone_url_base):]
     elif '/' not in repo:
-        repo = '{user}/{repo}'.format(user=getpass.getuser(), repo=repo)
+        user = getpass.getuser()
+        repo = f'{user}/{repo}'
     repo_url = '/repos/' + repo
     http = UserAgent()
     response = http.get(repo_url)
