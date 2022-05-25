@@ -85,9 +85,10 @@ def main():
     clone_url_base = 'https://github.com/'
     if repo.startswith(clone_url_base):
         repo = repo[len(clone_url_base):]
-    elif '/' not in repo:
+    if '/' not in repo:
         user = getpass.getuser()
-        repo = f'{user}/{repo}'
+        urepo = f'{user}/{repo}'
+        ap.error(f'bad repository name; did you mean {urepo!r}?')
     repo_url = '/repos/' + repo
     http = UserAgent()
     response = http.get(repo_url)
