@@ -33,7 +33,7 @@ def read_json(fp):
         data = data.decode('UTF-8')
         return json.loads(data)
 
-class GitEditor(object):
+class GitEditor:
 
     def __init__(self, trust_cwd=False):
         cmdline = ['git', 'var', 'GIT_EDITOR']
@@ -50,7 +50,7 @@ class GitEditor(object):
             shell=True
         )
 
-class UserAgent(object):
+class UserAgent:
 
     def _request(self, method, url, *, data=None):
         token = os.environ['GITHUB_TOKEN']
