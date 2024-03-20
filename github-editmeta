@@ -35,7 +35,7 @@ def read_json(fp):
 
 class GitEditor:
 
-    def __init__(self, trust_cwd=False):
+    def __init__(self, *, trust_cwd=False):
         cmdline = ['git', 'var', 'GIT_EDITOR']
         if not trust_cwd:
             cmdline[1:1] = ['-C', '/']
